@@ -1,6 +1,7 @@
 from time import time
 from fastapi import FastAPI, __version__
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
 from fastapi.responses import HTMLResponse
 
 app = FastAPI()
@@ -25,6 +26,16 @@ html = f"""
     </body>
 </html>
 """
+
+def fake_data_streamer():
+    for i in range(10):
+        yield b'event: message\ndata:tom\n\n'
+        time.sleep(1)
+
+@app.get("/stream")
+async def root():
+    return StreamingResponse(fake_data_streamer(), media_type='text/event-stream')
+
 
 @app.get("/")
 async def root():
